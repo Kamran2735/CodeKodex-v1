@@ -52,25 +52,25 @@ export default function NavBar() {
 
           {/* Right: Contact capsule */}
           <div className="hidden md:flex items-center">
-            <div className="flex items-center gap-3 rounded-t-[22px] rounded-b-none bg-[#8af135] px-8 py-2 text-white shadow-[0_10px_24px_rgba(0,0,0,.25)] py-4">
+            <div className="flex items-center gap-3 rounded-t-[22px] rounded-b-none px-8 py-2 text-[#0a1f1a] py-4">
               <Link
                 href="/contact"
-                className="rounded-full bg-[#0a1f1a] px-12 py-3 font-bold hover:bg-white hover:text-[#0f2923] transition-colors duration-300"
+            className="inline-flex items-center justify-center h-12 px-7 rounded-full bg-[#8af135] text-[#0a2f2a] font-extrabold hover:bg-white transition-colors shadow-lg shadow-[#8af135]/20"
               >
                 Contact
               </Link>
               {/* 3×3 grid */}
-<span
-  aria-hidden
-  className="group grid grid-cols-3 gap-[3px] pr-1 cursor-pointer"
->
-  {Array.from({ length: 9 }).map((_, i) => (
-    <span
-      key={i}
-      className="h-[6px] w-[6px] rounded-[2px] bg-[#0f2923] transition-colors duration-300 group-hover:bg-white"
-    />
-  ))}
-</span>
+            <span
+            aria-hidden
+            className="group grid grid-cols-3 gap-[3px] pr-1 cursor-pointer"
+            >
+            {Array.from({ length: 9 }).map((_, i) => (
+                <span
+                key={i}
+                className="h-[6px] w-[6px] rounded-[2px] bg-[#8af135] transition-colors duration-300 group-hover:bg-white"
+                />
+            ))}
+            </span>
 
             </div>
           </div>

@@ -6,7 +6,7 @@ type Props = { heroImg: string };
 
 export default function Hero({ heroImg }: Props) {
   return (
-    <section className="bg-[#0f2923]  py-0">
+    <section className="bg-[#0a1f1a] py-0">
       <div
         className="
           relative mx-auto max-w-7xl overflow-visible
@@ -88,9 +88,6 @@ export default function Hero({ heroImg }: Props) {
             </div>
           </div>
         </div>
-
-        {/* little visual seam card (optional subtle ring to echo the ref) */}
-        <div className="pointer-events-none absolute right-6 top-6 hidden h-[calc(100%-3rem)] w-[52%] rounded-[22px] ring-1 ring-black/5 md:block" />
       </div>
     </section>
   );
