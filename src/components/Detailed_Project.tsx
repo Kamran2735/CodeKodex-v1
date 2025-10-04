@@ -1,12 +1,14 @@
 'use client';
 
+import type { ComponentType, ReactNode } from 'react';
+
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
   ArrowUpRight, ExternalLink, Github, Calendar, Users, Building2,
   CheckCircle2, TrendingUp, Zap, Shield, Eye, Code2, Gauge,
-  Target, Lightbulb, Wrench, Award, Share2, Star
+  Target, Lightbulb, Wrench, Award, Share2, Star, MapPin
 } from 'lucide-react';
 
 import {
@@ -16,9 +18,10 @@ import {
 } from 'react-icons/si';
 import type { IconType } from 'react-icons';
 
-import Breadcrumb from './Breadcrumb';
+import Breadcrumb from './Project_Breadcrumb';
 
-/* ----------------------------- Tech Icon Setup ---------------------------- */
+/* ----------------------------- Types & Mappers ---------------------------- */
+
 type TechName =
   | 'next' | 'react' | 'ts' | 'tailwind' | 'framer'
   | 'node' | 'postgres' | 'redis' | 'prisma' | 'rest'
@@ -41,18 +44,112 @@ const techIconMap: Record<TechName, IconType> = {
   sentry: SiSentry,
 };
 
+type LucideName =
+  | 'users' | 'building' | 'calendar' | 'status' | 'location';
+
+const lucideMap: Record<LucideName, ComponentType<{ className?: string }>> = {
+  users: Users,
+  building: Building2,
+  calendar: Calendar,
+  status: CheckCircle2,
+  location: MapPin,
+};
+
+
 function TechIcon({ name, className = 'w-6 h-6' }: { name: TechName; className?: string }) {
   const Icon = techIconMap[name];
   return <Icon className={className} />;
 }
 
+/* ----------------------------- CaseStudy Schema --------------------------- */
+
+export type CaseStudy = {
+  breadcrumbTitle?: string;
+  slug?: string; // for related links
+  hero: {
+    badge?: string;
+    title: string;
+    description: string;
+    image: string; // /public path or remote allowed
+    growthBadge?: { value: string; label: string };
+    ctas?: {
+      live?: { label?: string; url: string };
+      code?: { label?: string; url: string };
+    };
+    quickFacts?: Array<{ icon?: LucideName; label: string; value: string }>;
+  };
+  overview: {
+    context: string[];
+    objectives?: string[];
+    responsibilities?: Array<{ icon?: 'code'|'eye'|'gauge'|'shield'|'users'|'wrench'; text: string }>;
+  };
+  outcomes?: {
+    kpis?: Array<{ icon?: 'trend'|'zap'|'users'|'status'; label: string; value: string; delta?: string }>;
+    gauges?: Array<{ label: string; value: number }>;
+    impacts?: { left: string[]; right: string[] };
+  };
+  process?: {
+    paragraphs?: string[];
+    insights?: string[];
+    images?: string[]; // 0..n (shown as two tall thumbs if >=2)
+    decisions?: Array<{ title: string; reason: string }>;
+  };
+  finalResult?: {
+    paragraphs?: string[];
+    performance?: Array<{ label: string; value: number }>;
+  };
+  techStack?: Array<{
+    title: string;
+    items: Array<{ name: TechName; label: string }>;
+  }>;
+  challenges?: Array<{ challenge: string; solution: string }>;
+  gallery?: {
+    desktop?: string[]; // images for desktop tab
+    mobile?: string[];  // images for mobile tab
+  };
+  testimonial?: {
+    quote: string;
+    name: string;
+    role: string;
+    company?: string;
+    rating?: number;
+    date?: string;
+    avatar?: string;
+    highlights?: string[];
+  };
+  conclusion?: {
+    lessons?: string[];
+    next?: string[];
+    ctas?: {
+      primary?: { label: string; href: string };
+      secondary?: { label: string; href: string };
+    };
+  };
+  related?: Array<{ slug: string; title: string; image: string }>;
+  meta?: {
+    // optional, e.g. dates, location for quickFacts fallback
+    date?: string;
+    location?: string;
+  };
+};
+
 /* --------------------------------- Page ---------------------------------- */
-export default function ProjectCaseStudy() {
+
+export default function ProjectCaseStudy({ data }: { data: CaseStudy }) {
   const [activeTab, setActiveTab] = useState<'desktop' | 'mobile'>('desktop');
+
+  const quickFacts = data.hero.quickFacts ?? [
+    { icon: 'users', label: 'Team', value: '—' },
+    { icon: 'building', label: 'Category', value: '—' },
+    { icon: 'location', label: 'Location', value: data.meta?.location ?? '—' },
+    { icon: 'calendar', label: 'Date', value: data.meta?.date ?? '—' },
+    { icon: 'status', label: 'Status', value: '—' },
+  ];
 
   return (
     <div className="min-h-screen bg-[#0a1f1a]">
-      <Breadcrumb title="Project Case Study" />
+        <Breadcrumb title={data.breadcrumbTitle ?? 'Project Case Study'} slug={data.slug ?? ''} />
+
 
       {/* Hero */}
       <section className="relative bg-[#0a1f1a] mt-12 pt-12 pb-16 overflow-hidden">
@@ -60,57 +157,70 @@ export default function ProjectCaseStudy() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8">
               <div>
-                <div className="text-[11px] font-bold tracking-[0.3em] text-lime-400 uppercase mb-4">
-                  TECHVANTAGE SOLUTIONS
-                </div>
+                {data.hero.badge ? (
+                  <div className="text-[11px] font-bold tracking-[0.3em] text-lime-400 uppercase mb-4">
+                    {data.hero.badge}
+                  </div>
+                ) : null}
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-6">
-                  TechVantage Solutions provides innovative tech solutions.
+                  {data.hero.title}
                 </h1>
                 <p className="text-white/70 text-lg leading-relaxed">
-                  A comprehensive enterprise platform built with cutting-edge technology that transformed operations,
-                  improving efficiency by 300% and reducing operational costs significantly.
+                  {data.hero.description}
                 </p>
               </div>
 
               {/* Quick Facts */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                <QuickFact icon={<Users />} label="Name" value="Edward Ummen" />
-                <QuickFact icon={<Building2 />} label="Categories" value="IT Solutions" />
-                <QuickFact icon={<Building2 />} label="Location" value="California, USA" />
-                <QuickFact icon={<Calendar />} label="Date" value="30 Oct, 2023" />
-                <QuickFact icon={<CheckCircle2 />} label="Status" value="100% Satisfied" />
-                <QuickFact icon={<Calendar />} label="Duration" value="03 Months" />
-              </div>
+              {quickFacts?.length ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  {quickFacts.map((qf, i) => (
+                    <QuickFact
+                      key={`${qf.label}-${i}`}
+                      icon={qf.icon ? renderLucide(qf.icon) : <CheckCircle2 />}
+                      label={qf.label}
+                      value={qf.value}
+                    />
+                  ))}
+                </div>
+              ) : null}
 
               {/* CTAs */}
               <div className="flex flex-wrap gap-4">
-                <a
-                  href="#"
-                  className="inline-flex items-center gap-2 rounded-full bg-lime-400 px-8 py-3.5 text-base font-bold text-[#0a1f1a] hover:bg-white transition-all"
-                >
-                  View Live Site
-                  <ExternalLink className="w-5 h-5" />
-                </a>
-                <a
-                  href="#"
-                  className="inline-flex items-center gap-2 rounded-full border-2 border-lime-400/30 bg-lime-400/5 px-8 py-3.5 text-base font-bold text-white hover:bg-lime-400/10 transition-all"
-                >
-                  <Github className="w-5 h-5" />
-                  View Code
-                </a>
+                {data.hero.ctas?.live?.url ? (
+                  <a
+                    href={data.hero.ctas.live.url}
+                    target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 rounded-full bg-lime-400 px-8 py-3.5 text-base font-bold text-[#0a1f1a] hover:bg-white transition-all"
+                  >
+                    {data.hero.ctas.live.label ?? 'View Live Site'}
+                    <ExternalLink className="w-5 h-5" />
+                  </a>
+                ) : null}
+                {data.hero.ctas?.code?.url ? (
+                  <a
+                    href={data.hero.ctas.code.url}
+                    target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 rounded-full border-2 border-lime-400/30 bg-lime-400/5 px-8 py-3.5 text-base font-bold text-white hover:bg-lime-400/10 transition-all"
+                  >
+                    <Github className="w-5 h-5" />
+                    {data.hero.ctas.code.label ?? 'View Code'}
+                  </a>
+                ) : null}
               </div>
             </div>
 
             {/* Visual */}
             <div className="relative">
               <div className="relative aspect-[4/3] rounded-3xl overflow-hidden border-2 border-lime-400/30 shadow-[0_20px_70px_rgba(138,241,53,0.15)]">
-                <Image src="/Portfolio/project1.png" alt="TechVantage Solutions" fill className="object-cover" priority />
+                <Image src={data.hero.image} alt={data.hero.title} fill className="object-cover" priority />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0a1f1a] via-transparent to-transparent opacity-60" />
               </div>
-              <div className="absolute -bottom-12 -right-6 bg-lime-400 rounded-2xl px-6 py-4 shadow-xl">
-                <div className="text-[#0a1f1a] text-3xl font-extrabold">300%</div>
-                <div className="text-[#0a1f1a] text-sm font-bold">Growth</div>
-              </div>
+              {data.hero.growthBadge ? (
+                <div className="absolute -bottom-12 -right-6 bg-lime-400 rounded-2xl px-6 py-4 shadow-xl">
+                  <div className="text-[#0a1f1a] text-3xl font-extrabold">{data.hero.growthBadge.value}</div>
+                  <div className="text-[#0a1f1a] text-sm font-bold">{data.hero.growthBadge.label}</div>
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
@@ -120,367 +230,344 @@ export default function ProjectCaseStudy() {
       <section className="relative bg-[#0f2f27] py-16">
         <div className="mx-auto max-w-7xl px-6">
           <SectionHeader label="PROJECT OVERVIEW" title="Context & Objectives" />
-
           <div className="grid lg:grid-cols-2 gap-12">
             <div className="space-y-6">
               <div>
                 <h3 className="text-2xl font-extrabold text-white mb-4">The Context</h3>
-                <p className="text-white/70 leading-relaxed mb-4">
-                  Lorem ipsum dolor sit amet consectetur adipiscing elit. Ut et massa mi. Aliquam in hendrerit urna
-                  pellentesque sit amet. Pellentesque sit amet sapien fringilla, mattis I consectetur, ultrices mauris.
-                </p>
-                <p className="text-white/70 leading-relaxed">
-                  Lorem ipsum dolor sit amet consectetur adipiscing elit. Ut et massa Aliquam in hendrerit urna
-                  pellentesque.
-                </p>
+                {data.overview.context.map((p, i) => (
+                  <p key={i} className="text-white/70 leading-relaxed mb-4">{p}</p>
+                ))}
               </div>
 
-              <div className="bg-[#1a3530] border border-lime-400/20 rounded-2xl p-6">
-                <h4 className="text-[11px] font-bold tracking-[0.2em] text-lime-400 mb-4">OBJECTIVES & CONSTRAINTS</h4>
-                <ul className="space-y-3">
-                  <ObjectiveItem text="Increase conversion rate by 45% within 6 months" />
-                  <ObjectiveItem text="Reduce page load time to under 1.5 seconds" />
-                  <ObjectiveItem text="Maintain 99.9% uptime with existing infrastructure" />
-                  <ObjectiveItem text="Implement accessibility standards (WCAG 2.1 AA)" />
-                </ul>
-              </div>
+              {data.overview.objectives?.length ? (
+                <div className="bg-[#1a3530] border border-lime-400/20 rounded-2xl p-6">
+                  <h4 className="text-[11px] font-bold tracking-[0.2em] text-lime-400 mb-4">OBJECTIVES & CONSTRAINTS</h4>
+                  <ul className="space-y-3">
+                    {data.overview.objectives.map((o, i) => <ObjectiveItem key={i} text={o} />)}
+                  </ul>
+                </div>
+              ) : null}
             </div>
 
             <div className="space-y-6">
-              <div className="bg-[#0a1f1a] border border-white/10 rounded-2xl p-8">
-                <h3 className="text-2xl font-extrabold text-white mb-6">My Responsibilities</h3>
-                <div className="space-y-4">
-                  <ResponsibilityItem icon={<Code2 />} text="Full-stack development using Next.js and TypeScript" />
-                  <ResponsibilityItem icon={<Eye />} text="UI/UX design and implementation with Tailwind CSS" />
-                  <ResponsibilityItem icon={<Gauge />} text="Performance optimization & Core Web Vitals" />
-                  <ResponsibilityItem icon={<Shield />} text="Security hardening & API integration" />
-                  <ResponsibilityItem icon={<Users />} text="Cross-functional collaboration" />
-                  <ResponsibilityItem icon={<Wrench />} text="CI/CD pipeline & deployment automation" />
+              {data.overview.responsibilities?.length ? (
+                <div className="bg-[#0a1f1a] border border-white/10 rounded-2xl p-8">
+                  <h3 className="text-2xl font-extrabold text-white mb-6">My Responsibilities</h3>
+                  <div className="space-y-4">
+                    {data.overview.responsibilities.map((r, i) => (
+                      <ResponsibilityItem key={i} icon={renderRespIcon(r.icon)} text={r.text} />
+                    ))}
+                  </div>
                 </div>
-              </div>
+              ) : null}
             </div>
           </div>
         </div>
       </section>
 
       {/* Results & Impact */}
-      <section className="relative bg-[#0a1f1a] py-16">
-        <div className="mx-auto max-w-7xl px-6">
-          <SectionHeader label="OUTCOMES" title="Results & Impact" />
+      {data.outcomes ? (
+        <section className="relative bg-[#0a1f1a] py-16">
+          <div className="mx-auto max-w-7xl px-6">
+            <SectionHeader label="OUTCOMES" title="Results & Impact" />
+            {data.outcomes.kpis?.length ? (
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                {data.outcomes.kpis.map((k, i) => (
+                  <KpiCard
+                    key={i}
+                    icon={renderKpiIcon(k.icon)}
+                    label={k.label}
+                    value={k.value}
+                    delta={k.delta ?? ''}
+                  />
+                ))}
+              </div>
+            ) : null}
 
-          {/* KPIs */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-            <KpiCard icon={<TrendingUp className="w-5 h-5" />} label="Revenue Growth" value="300%" delta="+18% QoQ" />
-            <KpiCard icon={<Zap className="w-5 h-5" />} label="Load Time" value="0.8s" delta="-1.5s vs baseline" />
-            <KpiCard icon={<Users className="w-5 h-5" />} label="Active Users" value="10,000+" delta="+2.1k MoM" />
-            <KpiCard icon={<CheckCircle2 className="w-5 h-5" />} label="Uptime" value="99.9%" delta="+0.2% QoQ" />
-          </div>
+            {data.outcomes.gauges?.length ? (
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                {data.outcomes.gauges.map((g, i) => <CircularGauge key={i} label={g.label} value={g.value} />)}
+              </div>
+            ) : null}
 
-          {/* Circular Gauges */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            <CircularGauge label="Lighthouse Perf" value={98} />
-            <CircularGauge label="Accessibility" value={100} />
-            <CircularGauge label="Best Practices" value={95} />
-            <CircularGauge label="SEO Score" value={100} />
+            {data.outcomes.impacts ? (
+              <div className="bg-[#0f2f27] rounded-3xl p-8 border border-white/5">
+                <h3 className="text-2xl font-extrabold text-white mb-6">What Changed (Highlights)</h3>
+                <div className="grid lg:grid-cols-2 gap-6">
+                  <ImpactList items={data.outcomes.impacts.left} />
+                  <ImpactList items={data.outcomes.impacts.right} />
+                </div>
+              </div>
+            ) : null}
           </div>
-
-          {/* Impact bullets */}
-          <div className="bg-[#0f2f27] rounded-3xl p-8 border border-white/5">
-            <h3 className="text-2xl font-extrabold text-white mb-6">What Changed (Highlights)</h3>
-            <div className="grid lg:grid-cols-2 gap-6">
-              <ImpactList
-                items={[
-                  '0 → automated CI/CD with gated releases',
-                  'Core Web Vitals consistently green across pages',
-                  'Edge caching + ISR reduced TTFB regionally',
-                  'DX improved — PR lead time down 35%',
-                ]}
-              />
-              <ImpactList
-                items={[
-                  'Support tickets down 42% after redesign',
-                  'A/B tests: +27% to PDP add-to-cart rate',
-                  'Error budget respected for 12 consecutive weeks',
-                  'Observability with Sentry → MTTD down 53%',
-                ]}
-              />
-            </div>
-          </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
 
       {/* Working Process */}
-      <section className="relative bg-[#0f2f27] py-16">
-        <div className="mx-auto max-w-7xl px-6">
-          <SectionHeader label="WORKING PROCESS" title="Challenge of this Case" />
+      {data.process ? (
+        <section className="relative bg-[#0f2f27] py-16">
+          <div className="mx-auto max-w-7xl px-6">
+            <SectionHeader label="WORKING PROCESS" title="Challenge of this Case" />
 
-          <div className="grid lg:grid-cols-2 gap-12 mb-12">
-            <div className="space-y-6">
-              <p className="text-white/70 leading-relaxed">
-                Lorem ipsum dolor sit amet consectetur adipiscing elit Ut et massa Aliquam in hendrerit urna. Pellentesque
-                sit amet sapien fringilla, mattis I consectetur, ultrices mauris. Maecenas vitae mattis tellus.
-              </p>
-              <p className="text-white/70 leading-relaxed">
-                Lorem ipsum dolor sit amet consectetur adipiscing elit Ut et massa Aliquam in hendrerit urna pellentesque.
-              </p>
-
-              <div className="space-y-3 mt-8">
-                <InsightItem text="Sed tempor magna et risus ornare, a lobortis." />
-                <InsightItem text="Vivamus tempus urna sit amet ante imperdiet." />
-                <InsightItem text="Mauris sit amet eros ac tellus egestas placerat." />
-                <InsightItem text="Aliquam at leo pretium of consecteteter." />
+            <div className="grid lg:grid-cols-2 gap-12 mb-12">
+              <div className="space-y-6">
+                {data.process.paragraphs?.map((p, i) => (
+                  <p key={i} className="text-white/70 leading-relaxed">{p}</p>
+                ))}
+                {data.process.insights?.length ? (
+                  <div className="space-y-3 mt-8">
+                    {data.process.insights.map((t, i) => <InsightItem key={i} text={t} />)}
+                  </div>
+                ) : null}
               </div>
+
+              {data.process.images?.length ? (
+                <div className="grid grid-cols-2 gap-6">
+                  {data.process.images.slice(0,2).map((src, i) => (
+                    <div key={i} className="relative aspect-[4/5] rounded-2xl overflow-hidden border border-white/10">
+                      <Image src={src} alt={`Process ${i+1}`} fill className="object-cover" />
+                    </div>
+                  ))}
+                </div>
+              ) : null}
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
-              <div className="relative aspect-[4/5] rounded-2xl overflow-hidden border border-white/10">
-                <Image src="/Portfolio/project1.png" alt="Process 1" fill className="object-cover" />
+            {data.process.decisions?.length ? (
+              <div className="bg-[#1a3530] rounded-2xl p-8 border border-lime-400/20 mb-12">
+                <h3 className="text-xl font-extrabold text-white mb-6 flex items-center gap-3">
+                  <Lightbulb className="w-6 h-6 text-lime-400" />
+                  Key Decisions & Trade-offs
+                </h3>
+                <div className="grid md:grid-cols-2 gap-6">
+                  {data.process.decisions.map((d, i) => <DecisionCard key={i} title={d.title} reason={d.reason} />)}
+                </div>
               </div>
-              <div className="relative aspect-[4/5] rounded-2xl overflow-hidden border border-white/10">
-                <Image src="/Portfolio/project1.png" alt="Process 2" fill className="object-cover" />
-              </div>
-            </div>
+            ) : null}
           </div>
-
-          <div className="bg-[#1a3530] rounded-2xl p-8 border border-lime-400/20 mb-12">
-            <h3 className="text-xl font-extrabold text-white mb-6 flex items-center gap-3">
-              <Lightbulb className="w-6 h-6 text-lime-400" />
-              Key Decisions & Trade-offs
-            </h3>
-            <div className="grid md:grid-cols-2 gap-6">
-              <DecisionCard
-                title="Why Next.js over Create React App"
-                reason="Server-side rendering improved SEO and initial load performance by 60%. SSG for static pages reduced hosting costs."
-              />
-              <DecisionCard
-                title="Tailwind CSS vs Styled Components"
-                reason="Tailwind's utility-first approach reduced CSS bundle size by 40% and improved development velocity."
-              />
-            </div>
-          </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
 
       {/* Final Result */}
-      <section className="relative bg-[#0a1f1a] py-16">
-        <div className="mx-auto max-w-7xl px-6">
-          <SectionHeader label="FINAL RESULT" title="Excellence in Our Service Final Results" />
-
-          <div className="grid lg:grid-cols-2 gap-12 mb-12">
-            <div className="space-y-6">
-              <p className="text-white/70 leading-relaxed">
-                Lorem ipsum dolor sit amet consectetur adipiscing elit Ut et massa Aliquam in hendrerit urna. Pellentesque
-                sit amet sapien fringilla, mattis I consectetur, ultrices mauris.
-              </p>
-              <p className="text-white/70 leading-relaxed">
-                Pellentesque commodo lacus at sodales sodales. Quisque lorem sagittis orci ut diam condimentum, vel euismod.
-              </p>
-            </div>
-            <div className="bg-[#0f2f27] rounded-2xl p-8 border border-white/5">
-              <h4 className="text-[11px] font-bold tracking-[0.2em] text-lime-400 mb-4">PERFORMANCE METRICS</h4>
-              <div className="space-y-4">
-                <PerformanceBar label="Lighthouse Performance" value={98} />
-                <PerformanceBar label="Accessibility Score" value={100} />
-                <PerformanceBar label="Best Practices" value={95} />
-                <PerformanceBar label="SEO Score" value={100} />
+      {data.finalResult ? (
+        <section className="relative bg-[#0a1f1a] py-16">
+          <div className="mx-auto max-w-7xl px-6">
+            <SectionHeader label="FINAL RESULT" title="Excellence in Our Service Final Results" />
+            <div className="grid lg:grid-cols-2 gap-12 mb-12">
+              <div className="space-y-6">
+                {data.finalResult.paragraphs?.map((p, i) => (
+                  <p key={i} className="text-white/70 leading-relaxed">{p}</p>
+                ))}
               </div>
+              {data.finalResult.performance?.length ? (
+                <div className="bg-[#0f2f27] rounded-2xl p-8 border border-white/5">
+                  <h4 className="text-[11px] font-bold tracking-[0.2em] text-lime-400 mb-4">PERFORMANCE METRICS</h4>
+                  <div className="space-y-4">
+                    {data.finalResult.performance.map((m, i) => (
+                      <PerformanceBar key={i} label={m.label} value={m.value} />
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
 
-      {/* Tech Stack (react-icons) */}
-      <section className="relative bg-[#0f2f27] py-16">
-        <div className="mx-auto max-w-7xl px-6">
-          <SectionHeader label="TECHNOLOGY" title="Tech Stack & Process" />
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-            <TechCard title="Frontend" items={[
-              { name: 'next', label: 'Next.js 14' },
-              { name: 'react', label: 'React 18' },
-              { name: 'ts', label: 'TypeScript' },
-              { name: 'tailwind', label: 'Tailwind CSS' },
-              { name: 'framer', label: 'Framer Motion' },
-            ]} />
-            <TechCard title="Backend" items={[
-              { name: 'node', label: 'Node.js' },
-              { name: 'postgres', label: 'PostgreSQL' },
-              { name: 'redis', label: 'Redis' },
-              { name: 'prisma', label: 'Prisma ORM' },
-              { name: 'rest', label: 'REST / OpenAPI' },
-            ]} />
-            <TechCard title="DevOps" items={[
-              { name: 'vercel', label: 'Vercel' },
-              { name: 'gha', label: 'GitHub Actions' },
-              { name: 'docker', label: 'Docker' },
-              { name: 'sentry', label: 'Sentry' },
-            ]} />
-            <TechCard title="Standards" items={[
-              { name: 'ts', label: 'Strict Types' },
-              { name: 'rest', label: 'API Contracts' },
-              { name: 'sentry', label: 'Observability' },
-              { name: 'docker', label: 'Containers' },
-              { name: 'gha', label: 'CI Policies' },
-            ]} />
-          </div>
-
-          {/* Challenges */}
-          <div className="bg-[#0a1f1a] rounded-2xl p-8 border border-white/10">
-            <h3 className="text-xl font-extrabold text-white mb-6">Challenges & Solutions</h3>
-            <div className="space-y-6">
-              <ChallengeItem
-                challenge="Legacy database migration with zero downtime"
-                solution="Implemented blue-green deployment with real-time sync, successfully migrating 2M+ records."
-              />
-              <ChallengeItem
-                challenge="Complex state management across 50+ components"
-                solution="Adopted Zustand for global state and React Query for server state, reducing re-renders by 70%."
-              />
-              <ChallengeItem
-                challenge="Meeting WCAG 2.1 AA standards without design compromise"
-                solution="Semantic HTML, ARIA, and full keyboard navigation. Achieved 100% Lighthouse accessibility."
-              />
+      {/* Tech Stack */}
+      {data.techStack?.length ? (
+        <section className="relative bg-[#0f2f27] py-16">
+          <div className="mx-auto max-w-7xl px-6">
+            <SectionHeader label="TECHNOLOGY" title="Tech Stack & Process" />
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+              {data.techStack.map((bucket, i) => (
+                <TechCard key={i} title={bucket.title} items={bucket.items} />
+              ))}
             </div>
+
+            {data.challenges?.length ? (
+              <div className="bg-[#0a1f1a] rounded-2xl p-8 border border-white/10">
+                <h3 className="text-xl font-extrabold text-white mb-6">Challenges & Solutions</h3>
+                <div className="space-y-6">
+                  {data.challenges.map((c, i) => (
+                    <ChallengeItem key={i} challenge={c.challenge} solution={c.solution} />
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
 
       {/* Gallery */}
-      <section className="relative bg-[#0a1f1a] py-16">
-        <div className="mx-auto max-w-7xl px-6">
-          <SectionHeader label="GALLERY" title="Visual Showcase" />
+      {data.gallery?.desktop?.length || data.gallery?.mobile?.length ? (
+        <section className="relative bg-[#0a1f1a] py-16">
+          <div className="mx-auto max-w-7xl px-6">
+            <SectionHeader label="GALLERY" title="Visual Showcase" />
 
-          <div className="flex justify-center mb-8">
-            <div className="inline-flex rounded-full bg-[#1a3530]/50 p-1.5 border border-white/5">
+            <div className="flex justify-center mb-8">
+              <div className="inline-flex rounded-full bg-[#1a3530]/50 p-1.5 border border-white/5">
+                <button
+                  onClick={() => setActiveTab('desktop')}
+                  className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all ${
+                    activeTab === 'desktop' ? 'bg-lime-400 text-[#0a1f1a]' : 'text-white/70 hover:text-white'
+                  }`}
+                >
+                  Desktop View
+                </button>
+                <button
+                  onClick={() => setActiveTab('mobile')}
+                  className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all ${
+                    activeTab === 'mobile' ? 'bg-lime-400 text-[#0a1f1a]' : 'text-white/70 hover:text-white'
+                  }`}
+                >
+                  Mobile View
+                </button>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              {(activeTab === 'desktop' ? (data.gallery?.desktop ?? []) : (data.gallery?.mobile ?? []))
+                .slice(0,4)
+                .map((src, i) => (
+                  <div key={`${activeTab}-${i}`} className="relative aspect-video rounded-2xl overflow-hidden border border-white/10 group">
+                    <Image
+                      src={src}
+                      alt={`${activeTab} screen ${i+1}`}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+                ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {/* Testimonial */}
+      {data.testimonial ? (
+        <section className="relative bg-[#0f2f27] py-16">
+          <div className="mx-auto max-w-7xl px-6">
+            <SectionHeader label="FEEDBACK" title="What the Client Said" />
+            <div className="mx-auto max-w-3xl">
+              <TestimonialHighlight
+                quote={data.testimonial.quote}
+                name={data.testimonial.name}
+                role={data.testimonial.role}
+                company={data.testimonial.company}
+                rating={data.testimonial.rating ?? 5}
+                date={data.testimonial.date}
+                avatar={data.testimonial.avatar}
+                highlights={data.testimonial.highlights ?? []}
+              />
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {/* Conclusion & CTAs */}
+      {data.conclusion ? (
+        <section className="relative bg-[#0f2f27] py-16">
+          <div className="mx-auto max-w-7xl px-6 text-center">
+            <div className="max-w-3xl mx-auto mb-12">
+              <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-6">Lessons Learned & Next Steps</h2>
+              {data.conclusion.lessons?.map((p, i) => (
+                <p key={i} className="text-white/70 leading-relaxed mb-4">{p}</p>
+              ))}
+              {data.conclusion.next?.map((p, i) => (
+                <p key={`n-${i}`} className="text-white/70 leading-relaxed">{p}</p>
+              ))}
+            </div>
+
+            <div className="flex flex-wrap justify-center gap-4 mb-8">
+              {data.conclusion.ctas?.primary ? (
+                <Link
+                  href={data.conclusion.ctas.primary.href}
+                  className="inline-flex items-center gap-2 rounded-full bg-lime-400 px-8 py-3.5 text-base font-bold text-[#0a1f1a] hover:bg-white transition-all"
+                >
+                  {data.conclusion.ctas.primary.label}
+                  <ArrowUpRight className="w-5 h-5" />
+                </Link>
+              ) : null}
+              {data.conclusion.ctas?.secondary ? (
+                <Link
+                  href={data.conclusion.ctas.secondary.href}
+                  className="inline-flex items-center gap-2 rounded-full border-2 border-white/10 bg-white/5 px-8 py-3.5 text-base font-bold text-white hover:bg-white/10 transition-all"
+                >
+                  {data.conclusion.ctas.secondary.label}
+                </Link>
+              ) : null}
+            </div>
+
+            <div className="flex justify-center gap-4">
               <button
-                onClick={() => setActiveTab('desktop')}
-                className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all ${
-                  activeTab === 'desktop' ? 'bg-lime-400 text-[#0a1f1a]' : 'text-white/70 hover:text-white'
-                }`}
+                className="flex items-center justify-center w-12 h-12 rounded-full border border-white/10 bg-white/5 text-white/70 hover:text-lime-400 hover:border-lime-400/30 transition-all"
+                aria-label="Share"
               >
-                Desktop View
-              </button>
-              <button
-                onClick={() => setActiveTab('mobile')}
-                className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all ${
-                  activeTab === 'mobile' ? 'bg-lime-400 text-[#0a1f1a]' : 'text-white/70 hover:text-white'
-                }`}
-              >
-                Mobile View
+                <Share2 className="w-5 h-5" />
               </button>
             </div>
           </div>
-
-          <div className="grid md:grid-cols-2 gap-6">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="relative aspect-video rounded-2xl overflow-hidden border border-white/10 group">
-                <Image
-                  src="/Portfolio/project1.png"
-                  alt={`Screen ${i}`}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-{/* Client Feedback (single highlight) */}
-<section className="relative bg-[#0f2f27] py-16">
-  <div className="mx-auto max-w-7xl px-6">
-    <SectionHeader label="FEEDBACK" title="What the Client Said" />
-    <div className="mx-auto max-w-3xl">
-      <TestimonialHighlight
-        quote={`From kickoff to launch, the team worked as an extension of ours. They migrated 2M records with zero downtime, dropped LCP below 1s globally, and shipped a design that finally converts. It's the most stress-free release we've had.`}
-        name="Sarah Thompson"
-        role="VP Engineering"
-        company="TechVantage"
-        rating={5}
-        date="Nov 2023"
-        highlights={[
-          '+27% PDP → Add-to-Cart',
-          '0 Downtime during migration',
-          '0.8s median LCP worldwide',
-          '3× faster release cadence'
-        ]}
-      />
-    </div>
-  </div>
-</section>
-
-
-      {/* Conclusion & CTAs */}
-      <section className="relative bg-[#0f2f27] py-16">
-        <div className="mx-auto max-w-7xl px-6 text-center">
-          <div className="max-w-3xl mx-auto mb-12">
-            <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-6">
-              Lessons Learned & Next Steps
-            </h2>
-            <p className="text-white/70 leading-relaxed mb-4">
-              This project reinforced the importance of early performance optimization and stakeholder communication.
-              If starting fresh, we'd add visual regression tests from day one and use feature flags for safer rollouts.
-            </p>
-            <p className="text-white/70 leading-relaxed">
-              Next up: real-time collaboration, broader i18n coverage, and more edge execution for global speed.
-            </p>
-          </div>
-
-          <div className="flex flex-wrap justify-center gap-4 mb-8">
-            <Link
-              href="/contact"
-              className="inline-flex items-center gap-2 rounded-full bg-lime-400 px-8 py-3.5 text-base font-bold text-[#0a1f1a] hover:bg-white transition-all"
-            >
-              Let's Work Together
-              <ArrowUpRight className="w-5 h-5" />
-            </Link>
-            <Link
-              href="/portfolio"
-              className="inline-flex items-center gap-2 rounded-full border-2 border-white/10 bg-white/5 px-8 py-3.5 text-base font-bold text-white hover:bg-white/10 transition-all"
-            >
-              View More Projects
-            </Link>
-          </div>
-
-          <div className="flex justify-center gap-4">
-            <button
-              className="flex items-center justify-center w-12 h-12 rounded-full border border-white/10 bg-white/5 text-white/70 hover:text-lime-400 hover:border-lime-400/30 transition-all"
-              aria-label="Share"
-            >
-              <Share2 className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
 
       {/* Related */}
-      <section className="relative bg-[#0a1f1a] py-16 border-t border-white/10">
-        <div className="mx-auto max-w-7xl px-6">
-          <h3 className="text-2xl font-extrabold text-white mb-8 text-center">Related Projects</h3>
-          <div className="grid md:grid-cols-3 gap-6">
-            {['DigitalNest', 'LogicLeap', 'DataDynamo'].map((project) => (
-              <Link
-                key={project}
-                href={`/portfolio/${project.toLowerCase()}`}
-                className="group relative aspect-video rounded-2xl overflow-hidden border border-white/10 hover:border-lime-400/30 transition-all"
-              >
-                <Image src="/Portfolio/project1.png" alt={project} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a1f1a] via-transparent to-transparent opacity-80" />
-                <div className="absolute bottom-4 left-4 right-4">
-                  <h4 className="text-white font-extrabold text-lg">{project} Solutions</h4>
-                  <p className="text-white/70 text-sm">View Case Study →</p>
-                </div>
-              </Link>
-            ))}
+      {data.related?.length ? (
+        <section className="relative bg-[#0a1f1a] py-16 border-t border-white/10">
+          <div className="mx-auto max-w-7xl px-6">
+            <h3 className="text-2xl font-extrabold text-white mb-8 text-center">Related Projects</h3>
+            <div className="grid md:grid-cols-3 gap-6">
+              {data.related.map((p) => (
+                <Link
+                  key={p.slug}
+                  href={`/portfolio/${p.slug}`}
+                  className="group relative aspect-video rounded-2xl overflow-hidden border border-white/10 hover:border-lime-400/30 transition-all"
+                >
+                  <Image src={p.image} alt={p.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0a1f1a] via-transparent to-transparent opacity-80" />
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <h4 className="text-white font-extrabold text-lg">{p.title}</h4>
+                    <p className="text-white/70 text-sm">View Case Study →</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
     </div>
   );
 }
 
-/* ----------------------------- Atoms & Molecules ----------------------------- */
+/* ----------------------------- Helpers & UI atoms ----------------------------- */
+
+function renderLucide(name: LucideName) {
+  const Icon = lucideMap[name] ?? CheckCircle2;
+  return <Icon className="w-5 h-5" />;
+}
+
+function renderRespIcon(kind?: 'code'|'eye'|'gauge'|'shield'|'users'|'wrench') {
+  const map: Record<string, ReactNode> = {
+    code: <Code2 />,
+    eye: <Eye />,
+    gauge: <Gauge />,
+    shield: <Shield />,
+    users: <Users />,
+    wrench: <Wrench />,
+  };
+  return map[kind ?? 'code'];
+}
+
+
+function renderKpiIcon(kind?: 'trend'|'zap'|'users'|'status') {
+  const map: Record<string, ReactNode> = {
+    trend: <TrendingUp className="w-5 h-5" />,
+    zap: <Zap className="w-5 h-5" />,
+    users: <Users className="w-5 h-5" />,
+    status: <CheckCircle2 className="w-5 h-5" />,
+  };
+  return map[kind ?? 'trend'];
+}
+
 
 function QuickFact({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
@@ -521,7 +608,6 @@ function InsightItem({ text }: { text: string }) {
   );
 }
 
-
 function ResponsibilityItem({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
     <div className="flex items-start gap-3">
@@ -533,8 +619,7 @@ function ResponsibilityItem({ icon, text }: { icon: React.ReactNode; text: strin
   );
 }
 
-/* KPI Card */
-function KpiCard({ icon, value, label, delta }: { icon: React.ReactNode; value: string; label: string; delta: string }) {
+function KpiCard({ icon, value, label, delta }: { icon: React.ReactNode; value: string; label: string; delta?: string }) {
   return (
     <div className="relative overflow-hidden rounded-2xl border border-lime-400/20 bg-[#0f2f27] p-6">
       <div
@@ -543,9 +628,11 @@ function KpiCard({ icon, value, label, delta }: { icon: React.ReactNode; value: 
       />
       <div className="flex items-center justify-between mb-2">
         <div className="text-lime-400">{icon}</div>
-        <span className="text-[11px] font-semibold text-lime-300/90 bg-lime-300/10 border border-lime-300/20 rounded-full px-2 py-0.5">
-          {delta}
-        </span>
+        {delta ? (
+          <span className="text-[11px] font-semibold text-lime-300/90 bg-lime-300/10 border border-lime-300/20 rounded-full px-2 py-0.5">
+            {delta}
+          </span>
+        ) : <span />}
       </div>
       <div className="text-3xl font-extrabold text-white">{value}</div>
       <div className="text-[11px] font-semibold text-white/70 tracking-wide uppercase mt-1">{label}</div>
@@ -553,7 +640,6 @@ function KpiCard({ icon, value, label, delta }: { icon: React.ReactNode; value: 
   );
 }
 
-/* Circular gauge (no deps) */
 function CircularGauge({ label, value }: { label: string; value: number }) {
   const angle = Math.max(0, Math.min(100, value)) * 3.6;
   return (
@@ -645,8 +731,8 @@ function TestimonialHighlight({
   company,
   rating = 5,
   date,
-  avatar,         // optional: /images/client.png
-  highlights = [],// optional: string[]
+  avatar,
+  highlights = [],
 }: {
   quote: string;
   name: string;
@@ -666,14 +752,12 @@ function TestimonialHighlight({
         shadow-[0_20px_70px_rgba(138,241,53,0.08)]
       "
     >
-      {/* soft lime glow */}
       <div
         aria-hidden
         className="pointer-events-none absolute -left-16 -top-16 h-40 w-40 rounded-full opacity-20 blur-3xl"
         style={{ background: 'radial-gradient(closest-side, rgba(163,230,53,0.35), transparent 70%)' }}
       />
       <div className="p-6 sm:p-8">
-        {/* Header: rating + verified + date */}
         <div className="mb-4 flex flex-wrap items-center gap-2 text-lime-400">
           <div className="flex items-center gap-1">
             {[...Array(5)].map((_, i) => (
@@ -693,22 +777,18 @@ function TestimonialHighlight({
           ) : null}
         </div>
 
-        {/* Quote */}
         <blockquote className="text-lg sm:text-xl leading-relaxed text-white/90">
           “{quote}”
         </blockquote>
 
-        {/* Author */}
         <figcaption className="mt-6 flex items-center gap-3">
           {avatar ? (
-            // image avatar
             <img
               src={avatar}
               alt={name}
               className="h-10 w-10 rounded-full border border-lime-400/30 object-cover"
             />
           ) : (
-            // fallback initials
             <div className="grid h-10 w-10 place-items-center rounded-full border border-lime-400/30 bg-lime-400/15 text-[12px] font-extrabold text-lime-400">
               {initials}
             </div>
@@ -721,7 +801,6 @@ function TestimonialHighlight({
           </div>
         </figcaption>
 
-        {/* Project-specific highlights */}
         {highlights.length ? (
           <ul className="mt-6 grid gap-2 sm:grid-cols-2">
             {highlights.map((h, i) => (

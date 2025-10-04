@@ -43,8 +43,8 @@ export default function NavBar() {
                 </Link>
               </li>
               <li>
-                <Link href="/blog" className="hover:text-[#8af135] transition-colors duration-300">
-                  Blog
+                <Link href="/articles" className="hover:text-[#8af135] transition-colors duration-300">
+                  Articles
                 </Link>
               </li>
             </ul>

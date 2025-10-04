@@ -1,0 +1,168 @@
+{
+  "techvantage": {
+    "breadcrumbTitle": "TECHVANTAGE SOLUTIONS ",
+    "hero": {
+      "badge": "TECHVANTAGE SOLUTIONS",
+      "title": "TechVantage Solutions provides innovative tech solutions.",
+      "description": "Enterprise platform… efficiency up 300% …",
+      "image": "/Portfolio/project1.png",
+      "growthBadge": { "value": "300%", "label": "Growth" },
+      "ctas": {
+        "live": { "url": "https://example.com", "label": "View Live Site" },
+        "code": { "url": "https://github.com/org/repo", "label": "View Code" }
+      },
+      "quickFacts": [
+        { "icon": "users", "label": "Team", "value": "5 engineers" },
+        { "icon": "building", "label": "Category", "value": "IT Solutions" },
+        { "icon": "location", "label": "Location", "value": "California, USA" },
+        { "icon": "calendar", "label": "Date", "value": "30 Oct, 2023" },
+        { "icon": "status", "label": "Status", "value": "100% Satisfied" }
+      ]
+    },
+    "overview": {
+      "context": [
+        "Context paragraph 1...",
+        "Context paragraph 2..."
+      ],
+      "objectives": [
+        "Increase conversion rate by 45% within 6 months",
+        "Reduce page load time to under 1.5 seconds"
+      ],
+      "responsibilities": [
+        { "icon": "code", "text": "Full-stack development using Next.js and TypeScript" },
+        { "icon": "eye", "text": "UI/UX design with Tailwind CSS" },
+        { "icon": "gauge", "text": "Performance & Core Web Vitals" },
+        { "icon": "shield", "text": "Security hardening & APIs" },
+        { "icon": "users", "text": "Cross-functional collaboration" },
+        { "icon": "wrench", "text": "CI/CD & deployment automation" }
+      ]
+    },
+    "outcomes": {
+      "kpis": [
+        { "icon": "trend", "label": "Revenue Growth", "value": "300%", "delta": "+18% QoQ" },
+        { "icon": "zap", "label": "Load Time", "value": "0.8s", "delta": "-1.5s vs baseline" },
+        { "icon": "users", "label": "Active Users", "value": "10,000+", "delta": "+2.1k MoM" },
+        { "icon": "status", "label": "Uptime", "value": "99.9%", "delta": "+0.2% QoQ" }
+      ],
+      "gauges": [
+        { "label": "Lighthouse Perf", "value": 98 },
+        { "label": "Accessibility", "value": 100 },
+        { "label": "Best Practices", "value": 95 },
+        { "label": "SEO Score", "value": 100 }
+      ],
+      "impacts": {
+        "left": [
+          "0 → automated CI/CD with gated releases",
+          "Core Web Vitals consistently green across pages",
+          "Edge caching + ISR reduced TTFB regionally",
+          "DX improved — PR lead time down 35%"
+        ],
+        "right": [
+          "Support tickets down 42% after redesign",
+          "A/B tests: +27% to PDP add-to-cart rate",
+          "Error budget respected for 12 consecutive weeks",
+          "Observability with Sentry → MTTD down 53%"
+        ]
+      }
+    },
+    "process": {
+      "paragraphs": [
+        "Process para 1…",
+        "Process para 2…"
+      ],
+      "insights": [
+        "Sed tempor magna et risus ornare.",
+        "Vivamus tempus urna sit amet ante."
+      ],
+      "images": ["/Portfolio/project1.png", "/Portfolio/project1.png"],
+      "decisions": [
+        { "title": "Why Next.js", "reason": "SSR + SSG improved SEO and cost." },
+        { "title": "Why Tailwind", "reason": "Utility-first cut CSS bloat ~40%." }
+      ]
+    },
+    "finalResult": {
+      "paragraphs": [
+        "Final para 1…",
+        "Final para 2…"
+      ],
+      "performance": [
+        { "label": "Lighthouse Performance", "value": 98 },
+        { "label": "Accessibility Score", "value": 100 },
+        { "label": "Best Practices", "value": 95 },
+        { "label": "SEO Score", "value": 100 }
+      ]
+    },
+    "techStack": [
+      {
+        "title": "Frontend",
+        "items": [
+          { "name": "next", "label": "Next.js 14" },
+          { "name": "react", "label": "React 18" },
+          { "name": "ts", "label": "TypeScript" },
+          { "name": "tailwind", "label": "Tailwind CSS" },
+          { "name": "framer", "label": "Framer Motion" }
+        ]
+      },
+      {
+        "title": "Backend",
+        "items": [
+          { "name": "node", "label": "Node.js" },
+          { "name": "postgres", "label": "PostgreSQL" },
+          { "name": "redis", "label": "Redis" },
+          { "name": "prisma", "label": "Prisma ORM" },
+          { "name": "rest", "label": "REST / OpenAPI" }
+        ]
+      },
+      {
+        "title": "DevOps",
+        "items": [
+          { "name": "vercel", "label": "Vercel" },
+          { "name": "gha", "label": "GitHub Actions" },
+          { "name": "docker", "label": "Docker" },
+          { "name": "sentry", "label": "Sentry" }
+        ]
+      },
+      {
+        "title": "Standards",
+        "items": [
+          { "name": "ts", "label": "Strict Types" },
+          { "name": "rest", "label": "API Contracts" },
+          { "name": "sentry", "label": "Observability" },
+          { "name": "docker", "label": "Containers" },
+          { "name": "gha", "label": "CI Policies" }
+        ]
+      }
+    ],
+    "challenges": [
+      { "challenge": "Legacy DB migration zero-downtime", "solution": "Blue/green + live sync; 2M+ records." },
+      { "challenge": "Complex state across 50+ comps", "solution": "Zustand + React Query, re-renders down 70%." }
+    ],
+    "gallery": {
+      "desktop": ["/Portfolio/project1.png", "/Portfolio/project1.png", "/Portfolio/project1.png", "/Portfolio/project1.png"],
+      "mobile": ["/Portfolio/project1.png", "/Portfolio/project1.png"]
+    },
+    "testimonial": {
+      "quote": "From kickoff to launch… most stress-free release we’ve had.",
+      "name": "Sarah Thompson",
+      "role": "VP Engineering",
+      "company": "TechVantage",
+      "rating": 5,
+      "date": "Nov 2023",
+      "highlights": ["+27% PDP → Add-to-Cart", "0 Downtime during migration", "0.8s median LCP", "3× faster releases"]
+    },
+    "conclusion": {
+      "lessons": ["Early perf work + stakeholder comms are compounding wins."],
+      "next": ["Next: real-time collaboration, broader i18n, more edge execution."],
+      "ctas": {
+        "primary": { "label": "Let's Work Together", "href": "/contact" },
+        "secondary": { "label": "View More Projects", "href": "/portfolio" }
+      }
+    },
+    "related": [
+      { "slug": "digitalnest", "title": "DigitalNest Solutions", "image": "/Portfolio/project1.png" },
+      { "slug": "logicleap", "title": "LogicLeap Solutions", "image": "/Portfolio/project1.png" },
+      { "slug": "datadynamo", "title": "DataDynamo Solutions", "image": "/Portfolio/project1.png" }
+    ],
+    "meta": { "date": "30 Oct, 2023", "location": "California, USA" }
+  }
+}
